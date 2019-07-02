@@ -67,7 +67,7 @@ for i in range(num_traj):
     plt.plot(Z[:, 0], Z[:, 1], '-b', lw = 0.5)
     plt.axis('equal')
 
-MP = dmp(n_dmps = 2, n_bfs = 50, K = np.ones(2) * 1000, alpha_s = 4.,rescale = True, T = 2.)
+MP = dmp(n_dmps = 2, n_bfs = 50, K = 1000, alpha_s = 4.,rescale = True, T = 2.)
 MP.paths_regression(traj_set, t_set)
 x_track, _, _, _ = MP.rollout()
 plt.figure(2)

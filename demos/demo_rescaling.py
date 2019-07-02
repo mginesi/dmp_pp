@@ -8,11 +8,10 @@ rc('text', usetex=True)
 
 # To use the package in the main folder
 import sys
-sys.path.insert(0, '/home/michele/Documents/Lavoro/new_pydmps/dmp/codes')
-sys.path.insert(0, '/home/michele/Documents/Lavoro/new_pydmps/dmp/stuff')
+sys.path.insert(0, '../codes')
+sys.path.insert(0, 'codes/')
 
 import dmp_cartesian
-import obstacle_ellipse
 
 # Debugger
 import pdb
@@ -34,7 +33,7 @@ ms = 10 # marker size
 ## Case alpha = 4
 
 # Initialization and lLearning the forcing term
-myK = np.array([1000, 1000]) * 1.0
+myK = 1000
 alpha_s = 4.0
 dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
 dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
@@ -177,8 +176,8 @@ plt.title(r'$\alpha$ = 4')
 
 ## Case alpha = 1
 
-# Initialization and lLearning the forcing term
-myK = np.array([100, 100]) * 10.0
+# Initialization and learning the forcing term
+myK = 1000
 alpha_s = 1.0
 dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
 dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
