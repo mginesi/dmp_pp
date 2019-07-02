@@ -60,17 +60,21 @@ class DMPs_cartesian(object):
         self.n_bfs = n_bfs
         # Default values give as in [2]
         if K is None:
-            K = np.ones(n_dmps) * 1050.0
+            K = 1050.0
         self.K = K
         if D is None:
             D = 2 * np.sqrt(self.K)
         self.D = D
         # Create the matrix of the linear component of the problem
         self.linear_part = np.zeros([2 * self.n_dmps, 2 * self.n_dmps])
-        for d in range(n_dmps):
-            self.linear_part[2 * d, 2 * d] = - self.D[d]
-            self.linear_part[2 * d, 2 * d + 1] = - self.K[d]
-            self.linear_part[2 * d + 1, 2 * d] = 1.
+        self.linear_part\
+            [range(0, 2 * self.n_dmps, 2), range(0, 2 * self.n_dmps, 2)] = \
+                - self.D
+        self.linear_part\
+            [range(0, 2 * self.n_dmps, 2), range(1, 2 * self.n_dmps, 2)] = \
+                - self.K
+        self.linear_part\
+            [range(1, 2 * self.n_dmps, 2), range(0, 2 * self.n_dmps, 2)] = 1.
         # Set up the CS
         self.cs = CanonicalSystem(dt = dt, run_time = T, alpha_s = alpha_s)
         # Set up the DMP system
