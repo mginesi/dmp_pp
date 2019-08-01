@@ -33,7 +33,7 @@ ms = 10 # marker size
 ## Case alpha = 4
 
 # Initialization and lLearning the forcing term
-myK = 1000
+myK = 3000
 alpha_s = 4.0
 dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
 dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
@@ -177,7 +177,7 @@ plt.title(r'$\alpha$ = 4')
 ## Case alpha = 1
 
 # Initialization and learning the forcing term
-myK = 1000
+myK = 3000
 alpha_s = 1.0
 dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
 dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
