@@ -66,7 +66,7 @@ $$ \varphi _i(s) =
     0 & \text{otherwise}
 \end{cases} . $$
 
-![Plot of the basis functions.](basis.png)
+![Plot of the basis functions.](doc/basis.png)
 
 These basis functions are plotted in the figure. The first is the Gaussian functions, the second the mollifier, the others are the Wendland. All of them are plotted using $c = 0$ and $h = 1$.
 
@@ -76,7 +76,7 @@ During the learning phase, a trajectory $\mathbf{x}(t)$ is recorded. This permit
 
 Then, the dynamical system can be integrated using the same weights when defining the forcing term, but possibly changing the initial and goal position. This will result in a trajectory of similar shape to the learned one, but adapted to the new points. Moreover, the goal position can change during the execution and convergence to it is still guaranteed.
 
-![Example of execution.](draw2d_demo.png)
+![Example of execution.](doc/draw2d_demo.png)
 
 ### Invariance Under Affine Transformations ###
 
@@ -84,7 +84,7 @@ DMPs can be written to be invariant under affine transformations. We have implem
 
 In the following figure, the desired (and learned) trajectory is plotted in blue. the new goal is represented by the black star. The dashed red line shows the execution obtained with classical DMPs, while the dash-dotted green line show the execution obtained by taking advantage of the affine invariance.
 
-![DMP vs DMP++](generalization.png)
+![DMP vs DMP++](doc/generalization.png)
 
 ## Contact ##
 
