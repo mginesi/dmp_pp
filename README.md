@@ -2,9 +2,11 @@
 
 This repository contains the implementation of Dynamic Movement Primitive Plus Plus (DMP++), in Python 3.5.
 
-In particular, this repository contains all the synthetic tests done for the work (currently under revision):
+In particular, this repository contains all the synthetic tests done for the work:
 
 _M. Ginesi, N. Sansonetto, and P. Fiorini_; **DMP++: Overcoming Some Drawbacks of Dynamic Movement Primitives**
+
+You can find the pre-print at https://arxiv.org/abs/1908.10608v1
 
 ## Contents ##
 
