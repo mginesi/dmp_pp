@@ -7,7 +7,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
-import pdb
+import tqdm
 
 t_span = np.linspace(0.0, 1.0, 1000)
 T = t_span[-1] - t_span[0]
@@ -28,7 +28,7 @@ err_wen_7 = np.zeros(len(range_nbfs))
 err_t_g = np.zeros(len(range_nbfs))
 err_t_gaus_biased = np.zeros(len(range_nbfs))
 count = -1
-for n_bfs in range_nbfs:
+for n_bfs in tqdm.tqdm(range_nbfs):
     count += 1
     psi_set = np.zeros([n_bfs + 1, 1000])
     truncated_psi_set = np.zeros([n_bfs + 1, 1000])

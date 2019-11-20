@@ -18,9 +18,9 @@ import pdb
 
 # Creation of the trajectory
 t_steps = 10 ** 3
-t = np.linspace (0., np.pi, t_steps)
-x_1 = t
-x_2 = np.sin(t) * np.sin(t)
+t = np.linspace (0.0, 2.0 * np.pi, t_steps)
+x_1 = np.cos(t) * t * t
+x_2 = np.sin(t) * t
 x_des = np.zeros([t_steps, 2])
 x_des[:, 0] = x_1
 x_des[:, 1] = x_2
@@ -30,7 +30,7 @@ print_legend = False
 lw = 1 # line width
 ms = 10 # marker size
 
-## Case alpha = 4
+## Case K = 1000
 
 # Initialization and lLearning the forcing term
 myK = 1000
@@ -174,11 +174,11 @@ plt.axis('equal')
 plt.legend(loc = 'best')
 plt.title(r'$\alpha$ = 4')
 
-## Case alpha = 1
+## Case K = 100
 
 # Initialization and learning the forcing term
-myK = 1000
-alpha_s = 1.0
+myK = 100
+alpha_s = 4.0
 dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
 dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
 dmp_rescaling.imitate_path (x_des = x_des)

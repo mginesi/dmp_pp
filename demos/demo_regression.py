@@ -87,4 +87,22 @@ plt.xlabel(r'$x_1$')
 plt.ylabel(r'$x_2$')
 plt.title('Unscaled reference frame')
 
+# With noise
+var = 0.0001
+for i in range(num_traj):
+    traj_set[i] += np.random.randn(np.shape(traj_set[i])[0], np.shape(traj_set[i])[1]) * np.sqrt(var)
+
+MP.paths_regression(traj_set, t_set)
+MP_single = dmp(n_dmps = 2, n_bfs = 50, K = 1000, alpha_s = 4.,rescale = True, T = 2.)
+MP_single.imitate_path(x_des = traj_set[0], t_des = t_set[0])
+x_track, dx_track, ddx_track, _ = MP.rollout()
+MP_single.x0 = np.zeros(2)
+MP_single.goal = np.ones(2)
+x_track_single, _, _, _ = MP_single.rollout()
+plt.figure(3)
+plt.plot(x_track[:,0], x_track[:,1], '-r')
+plt.plot(x_track_single[:,0], x_track_single[:,1], '--g')
+plt.xlabel(r'$x_1$', fontsize = 14)
+plt.ylabel(r'$x_2$', fontsize = 14)
+
 plt.show()
