@@ -5,15 +5,9 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
-import pdb
 
-# To use the package in the main folder
-import sys
-sys.path.insert(0, '../codes')
-sys.path.insert(0, 'codes')
-
-from dmp_cartesian import DMPs_cartesian as dmp
-from rotation_matrix import roto_dilatation
+from dmp.dmp_cartesian import DMPs_cartesian as dmp
+from dmp.rotation_matrix import roto_dilatation
 
 num_traj = 50
 traj_set = []

@@ -22,11 +22,11 @@ import scipy.integrate
 import scipy.interpolate
 import copy
 
-from cs import CanonicalSystem
-from exponential_integration import exp_eul_step
-from exponential_integration import phi1
-from rotation_matrix import roto_dilatation
-import derivative_matrices as der_mtrx
+from dmp.cs import CanonicalSystem
+from dmp.exponential_integration import exp_eul_step
+from dmp.exponential_integration import phi1
+from dmp.rotation_matrix import roto_dilatation
+import dmp.derivative_matrices as der_mtrx
 
 class DMPs_cartesian(object):
     # ------------------------------------------------------------------------ #

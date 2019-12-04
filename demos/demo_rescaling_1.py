@@ -6,15 +6,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
-# To use the package in the main folder
-import sys
-sys.path.insert(0, '../codes')
-sys.path.insert(0, 'codes/')
-
-import dmp_cartesian
-
-# Debugger
-import pdb
+from dmp import dmp_cartesian
 
 # Creation of the trajectory
 t_steps = 10 ** 3
