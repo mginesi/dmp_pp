@@ -48,6 +48,7 @@ class DMPs_cartesian(object):
         n_dmps = 3, n_bfs = 50, dt = 0.01, x0 = None, goal = None, T = 1.0,
         K = 1050, D = None, w = None, tol = 0.01, alpha_s = 4.0,
         rescale = False, basis = 'gaussian', **kwargs):
+        '''
         # -------------------------------------------------------------------- #
         # n_dmps int   : number of dynamic movement primitives (i.e. dimensions)
         # n_bfs int    : number of basis functions per DMP (actually, they will
@@ -64,7 +65,7 @@ class DMPs_cartesian(object):
         # rescale bool : decide if the rescale property is used
         # basis string : type of basis functions
         # -------------------------------------------------------------------- #
-
+        '''
         # Tolerance for the accuracy of the movement: the trajectory will stop
         # when || x - g || <= tol
         self.tol = tol

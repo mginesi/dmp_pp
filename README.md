@@ -1,6 +1,6 @@
 # README #
 
-This repository contains the implementation of Dynamic Movement Primitive Plus Plus (DMP++), in Python 3.5.
+This repository contains the implementation of Dynamic Movement Primitives, in Python 3.5.
 
 In particular, this repository contains all the synthetic tests done for the work:
 
@@ -8,19 +8,64 @@ _M. Ginesi, N. Sansonetto, and P. Fiorini_; **DMP++: Overcoming Some Drawbacks o
 
 You can find the pre-print at https://arxiv.org/abs/1908.10608v1
 
+## Installation ##
+
+The package can be installed by running
+
+```
+pip install -e .
+```
+
+or
+
+```
+pip3 install -e .
+```
+
+## Usage ##
+
+After installation, you can import the DMP class as
+
+```
+from dmp.dmp_cartesian import DMPs_cartesian as dmp
+```
+
+After importing, you can create a class using
+
+```
+MP = dmp()
+```
+
+You can personalize the parameters using keywoard arguments, use the help for additional details.
+After importing, you can create a trajectory and learning it.
+
+```
+t = np.linspace(0, np.pi, 100)
+X = np.transpose(np.array([t * np.cos(2 * t), t * np.sin(2 * t), t * t]))
+MP.imitate_path(X)
+```
+
+Finally, you can execute a DMP using
+
+```
+x_track, _, _, _ = MP.rollout()
+```
+
+See the _demos/_ folder to see scripts in which various options are tested and compared, as well as how to change start and goal position
+
 ## Contents ##
 
-This repository contains two folders, namely _codes/_ and _demos/_.
-The _codes/_ folder contains all the functions needed to implement DMP++, while the _demo/_ folder contains the scripts used to perform the tests presented on the paper.
+This repository contains two folders, namely _dmp/_ and _demos/_.
+The _dmp/_ folder contains all the functions needed to implement DMPs, while the _demo/_ folder contains the scripts used to perform the tests presented on the paper.
 
-#### _codes/_ ####
+#### _dmp/_ ####
 
-_codes/_ contain the following files:
+_dmp/_ contain the following files:
 * _cs.py_ implements the Canonical System class, together with its methods.
 * _derivative_matrices.py_ implements the following two functions:
   * `compute_D1(n, dt)` returns the matrix which discretize the first derivative of a 1D function discretized on an equispaced time domain of `n` points and `dt` timestep, using a second orde estimate;
   * `compute_D2(n, dt)` returns the matrix which discretize the second derivative of a 1D function discretized on an equispaced time domain of `n` points and `dt` timestep, using a second orde estimate.
-* _dmp_cartesian.py_ implements the DMP++ class, together with its methods.
+* _dmp_cartesian.py_ implements the DMP class, together with its methods.
 * _exponential_integrator.py_ implements the functions needed to perform an integration step using the Exponential Euler method. In particular the function `exp_eul_step(y, A, b, dt)` returns the solution at time $ n+1$, computed as $ y_{n+1} = y_n + k \varphi_1(k A) (A y_n + b(t_n)) $ for the problem $ \dot{y} = A y + b(t) $, with $y_n$ = `y`, $A$ = `A`, $b(t_n)$ = `b`, and $k$ = `dt`.
 * _rotation_matri.py_ implements the functions needed to compute the roto-dilatation matrix. In particular, `roto_dilatation(x0, x1)` returns the roto-dilatation matrix which maps `x0` to `x1`.
 
@@ -29,9 +74,10 @@ _codes/_ contain the following files:
 _demos/_ contain the following files:
 * _demo_basis.py_ tests the accuracy in the approximation of a given function using different types of basis functions (Gaussian, trucated Gaussians, Wendland, and Mollifier-like). See Figure 2 of the paper.
 * _demo_regression.py_ tests the learning-from-multible-observations porcess using a set of trajecotries obtained by integrating a known dynamical system. See Figure 4a-4b of the paper.
-* _demo_rescaling.py_ tests the robustness of DMP++ against modification of the relative position between starting and ending points. See Figure 3 of the paper.
+* _demo_rescaling.py_ tests on the robustness of DMP against modification of the relative position between starting and ending points, with and without exploiting the invariance property. See Figure 3 of the paper.
+* _demo_rescaling_1.py_ additional tests on the robustness of DMP against modification of the relative position between starting and ending points, with and without exploiting the invariance property.
 
-## DMP and DMP++ Overview ##
+## (Quick) DMP Overview ##
 
 ### Formulation ###
 
@@ -86,7 +132,7 @@ DMPs can be written to be invariant under affine transformations. We have implem
 
 In the following figure, the desired (and learned) trajectory is plotted in blue. the new goal is represented by the black star. The dashed red line shows the execution obtained with classical DMPs, while the dash-dotted green line show the execution obtained by taking advantage of the affine invariance.
 
-![DMP vs DMP++](doc/generalization.png)
+![classical VS extended DMPs](doc/generalization.png)
 
 ## Contact ##
 
