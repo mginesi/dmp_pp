@@ -1,21 +1,21 @@
-# ---------------------------------------------------------------------------- #
-# Copyright (C) 2019 Michele Ginesi
-# Copyright (C) 2018 Daniele Meli
-# Copyright (C) 2013 Travis DeWolf
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-# ---------------------------------------------------------------------------- #
+'''
+Copyright (C) 2019 Michele Ginesi
+Copyright (C) 2018 Daniele Meli
+Copyright (C) 2013 Travis DeWolf
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+'''
 
 import numpy as np
 import scipy.integrate
@@ -29,42 +29,40 @@ from dmp.rotation_matrix import roto_dilatation
 import dmp.derivative_matrices as der_mtrx
 
 class DMPs_cartesian(object):
-    # ------------------------------------------------------------------------ #
-    # Implementation of discrete Dynamic Movement Primitives in cartesian space,
-    # as described in
-    # [1] Park, D. H., Hoffmann, H., Pastor, P., & Schaal, S. (2008, December).
-    #     Movement reproduction and obstacle avoidance with Dynamic movement
-    #     primitives and potential fields.
-    #     In Humanoid Robots, 2008. Humanoids 2008. 8th IEEE-RAS International
-    #     Conference on (pp. 91-98). IEEE.
-    # [2] Hoffmann, H., Pastor, P., Park, D. H., & Schaal, S. (2009, May).
-    #     Biologically-inspired dynamical systems for movement generation:
-    #     automatic real-time goal adaptation and obstacle avoidance.
-    #     In Robotics and Automation, 2009. ICRA'09. IEEE International
-    #     Conference on (pp. 2587-2592). IEEE.
-    # ------------------------------------------------------------------------ #
+    '''
+    Implementation of discrete Dynamic Movement Primitives in cartesian space,
+    as described in
+    [1] Park, D. H., Hoffmann, H., Pastor, P., & Schaal, S. (2008, December).
+        Movement reproduction and obstacle avoidance with Dynamic movement
+        primitives and potential fields.
+        In Humanoid Robots, 2008. Humanoids 2008. 8th IEEE-RAS International
+        Conference on (pp. 91-98). IEEE.
+    [2] Hoffmann, H., Pastor, P., Park, D. H., & Schaal, S. (2009, May).
+        Biologically-inspired dynamical systems for movement generation:
+        automatic real-time goal adaptation and obstacle avoidance.
+        In Robotics and Automation, 2009. ICRA'09. IEEE International
+        Conference on (pp. 2587-2592). IEEE.
+    '''
 
     def __init__(self,
         n_dmps = 3, n_bfs = 50, dt = 0.01, x0 = None, goal = None, T = 1.0,
         K = 1050, D = None, w = None, tol = 0.01, alpha_s = 4.0,
         rescale = False, basis = 'gaussian', **kwargs):
         '''
-        # -------------------------------------------------------------------- #
-        # n_dmps int   : number of dynamic movement primitives (i.e. dimensions)
-        # n_bfs int    : number of basis functions per DMP (actually, they will
-        #                be one more)
-        # dt float     : timestep for simulation
-        # x0 array     : initial state of DMPs
-        # goal array   : goal state of DMPs
-        # T float      : final time
-        # K float      : elastic parameter in the dynamical system
-        # D float      : damping parameter in the dynamical system
-        # w array      : associated weights
-        # tol float    : tolerance
-        # alpha_s float: constant of the Canonical System
-        # rescale bool : decide if the rescale property is used
-        # basis string : type of basis functions
-        # -------------------------------------------------------------------- #
+        n_dmps int   : number of dynamic movement primitives (i.e. dimensions)
+        n_bfs int    : number of basis functions per DMP (actually, they will
+                       be one more)
+        dt float     : timestep for simulation
+        x0 array     : initial state of DMPs
+        goal array   : goal state of DMPs
+        T float      : final time
+        K float      : elastic parameter in the dynamical system
+        D float      : damping parameter in the dynamical system
+        w array      : associated weights
+        tol float    : tolerance
+        alpha_s float: constant of the Canonical System
+        rescale bool : decide if the rescale property is used
+        basis string : type of basis functions
         '''
         # Tolerance for the accuracy of the movement: the trajectory will stop
         # when || x - g || <= tol
@@ -103,9 +101,9 @@ class DMPs_cartesian(object):
         self.w = w
 
     def compute_linear_part(self):
-        # -------------------------------------------------------------------- #
-        # Compute the linear component of the problem.
-        # -------------------------------------------------------------------- #
+        '''
+        Compute the linear component of the problem.
+        '''
         self.linear_part = np.zeros([2 * self.n_dmps, 2 * self.n_dmps])
         self.linear_part\
             [range(0, 2 * self.n_dmps, 2), range(0, 2 * self.n_dmps, 2)] = \
@@ -117,20 +115,20 @@ class DMPs_cartesian(object):
             [range(1, 2 * self.n_dmps, 2), range(0, 2 * self.n_dmps, 2)] = 1.
 
     def gen_centers(self):
-        # -------------------------------------------------------------------- #
-        # Set the centres of the basis functions to be spaced evenly throughout
-        # run time
-        # -------------------------------------------------------------------- #
+        '''
+        Set the centres of the basis functions to be spaced evenly throughout
+        run time
+        '''
         # Desired activations throughout time
         self.c = np.exp(- self.cs.alpha_s * self.cs.run_time *
             ((np.cumsum(np.ones([1, self.n_bfs + 1])) - 1) / self.n_bfs))
 
     def gen_psi(self, s):
-        # -------------------------------------------------------------------- #
-        # Generates the activity of the basis functions for a given canonical
-        # system rollout.
-        #  s : array containing the rollout of the canonical system
-        # -------------------------------------------------------------------- #
+        '''
+        Generates the activity of the basis functions for a given canonical
+        system rollout.
+         s : array containing the rollout of the canonical system
+        '''
         c = np.reshape(self.c, [self.n_bfs + 1, 1])
         w = np.reshape(self.width, [self.n_bfs + 1,1 ])
         if (self.basis == 'gaussian'):
@@ -162,11 +160,11 @@ class DMPs_cartesian(object):
         return psi_set
 
     def gen_weights(self, f_target):
-        # -------------------------------------------------------------------- #
-        # Generate a set of weights over the basis functions such that the
-        # target forcing term trajectory is matched.
-        #  f_target shaped n_dim x n_time_steps
-        # -------------------------------------------------------------------- #
+        '''
+        Generate a set of weights over the basis functions such that the
+        target forcing term trajectory is matched.
+         f_target shaped n_dim x n_time_steps
+        '''
         # Generate the basis functions
         s_track = self.cs.rollout()
         psi_track = self.gen_psi(s_track)
@@ -198,9 +196,9 @@ class DMPs_cartesian(object):
         self.w = np.nan_to_num(self.w)
 
     def gen_width(self):
-        # -------------------------------------------------------------------- #
-        # Set the "widths" for the basis functions.
-        # -------------------------------------------------------------------- #
+        '''
+        Set the "widths" for the basis functions.
+        '''
         if (self.basis == 'gaussian'):
             self.width = 1.0 / np.diff(self.c) / np.diff(self.c)
             self.width = np.append(self.width, self.width[-1])
@@ -210,14 +208,14 @@ class DMPs_cartesian(object):
 
     def imitate_path(self, x_des, dx_des = None, ddx_des = None, t_des = None,
         g_w = True, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Takes in a desired trajectory and generates the set of system
-        # parameters that best realize this path.
-        #   x_des array shaped num_timesteps x n_dmps
-        #   t_des 1D array of num_timesteps component
-        #   g_w boolean, used to separate the one-shot learning from the
-        #                regression over multiple demonstrations
-        # -------------------------------------------------------------------- #
+        '''
+        Takes in a desired trajectory and generates the set of system
+        parameters that best realize this path.
+          x_des array shaped num_timesteps x n_dmps
+          t_des 1D array of num_timesteps component
+          g_w boolean, used to separate the one-shot learning from the
+                       regression over multiple demonstrations
+        '''
 
         ## Set initial state and goal
         self.x0 = x_des[0].copy()
@@ -274,13 +272,13 @@ class DMPs_cartesian(object):
         return f_target
 
     def paths_regression(self, traj_set, t_set = None):
-        # -------------------------------------------------------------------- #
-        # Takes in a set (list) of desired trajectories (with possibly the
-        # execution times) and generate the weight which realize the best
-        # approximation.
-        #   each element of traj_set should be shaped num_timesteps x n_dim
-        #   trajectories
-        # -------------------------------------------------------------------- #
+        '''
+        Takes in a set (list) of desired trajectories (with possibly the
+        execution times) and generate the weight which realize the best
+        approximation.
+          each element of traj_set should be shaped num_timesteps x n_dim
+          trajectories
+        '''
 
         ## Step 1: Generate the set of the forcing terms
         f_set = np.zeros([len(traj_set), self.n_dmps, self.cs.timesteps])
@@ -343,9 +341,9 @@ class DMPs_cartesian(object):
         self.learned_position = np.ones(self.n_dmps)
 
     def reset_state(self, v0 = None, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Reset the system state
-        # -------------------------------------------------------------------- #
+        '''
+        Reset the system state
+        '''
         self.x = self.x0.copy()
         if v0 is None:
             v0 = 0.0 * self.x0
@@ -354,11 +352,11 @@ class DMPs_cartesian(object):
         self.cs.reset_state()
 
     def rollout(self, tau = 1.0, v0 = None, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Generate a system trial, no feedback is incorporated.
-        #   tau scalar, time rescaling constant
-        #   v0 scalar, initial velocity of the system
-        # -------------------------------------------------------------------- #
+        '''
+        Generate a system trial, no feedback is incorporated.
+          tau scalar, time rescaling constant
+          v0 scalar, initial velocity of the system
+        '''
 
         # Reset the state of the DMP
         if v0 is None:
@@ -392,13 +390,13 @@ class DMPs_cartesian(object):
         return x_track, dx_track, ddx_track, t_track
 
     def step(self, tau = 1.0, error = 0.0, external_force = None, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Run the DMP system for a single timestep.
-        #   P array : phi1 (dt A). If None it is recomputed
-        #   tau float: time rescaling constant
-        #   error float: optional system feedback
-        #   external_force 1D array: external force to add to the system
-        # -------------------------------------------------------------------- #
+        '''
+        Run the DMP system for a single timestep.
+          P array : phi1 (dt A). If None it is recomputed
+          tau float: time rescaling constant
+          error float: optional system feedback
+          external_force 1D array: external force to add to the system
+        '''
         error_coupling = 1.0 / (1.0 + error)
         # Generate basis function activation
         s = self.cs.s
@@ -439,150 +437,3 @@ class DMPs_cartesian(object):
         # Run canonical system
         s = self.cs.step(tau = tau, error_coupling = error_coupling)
         return self.x, self.dx, self.ddx
-
-    if __name__ == '__main__':
-        import matplotlib.pyplot as plt
-        from matplotlib import rc
-        rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-        rc('text', usetex=True)
-        from dmp_cartesian import DMPs_cartesian as dmps
-        """
-        First demo: lerning and generalization of  trajectory
-        """
-        t_steps = 10 ** 3
-        tf = 1.0
-        t = np.linspace (0.0, tf, t_steps)
-        x = np.sqrt(t)
-        y = np.sin(np.pi * t) + 1.0
-        x_des = np.zeros([t_steps, 2])
-        x_0 = x_des[0]
-        x_des[:, 0] = x
-        x_des[:, 1] = y
-        # Learning the forcing term
-        myK = 1000.0
-        dmp = dmps(n_dmps = 2, n_bfs = 50, K = myK, rescale = True, tol = 0.05)
-        dmp.imitate_path (x_des = x_des)
-        # Classical rollouut
-        x_track, _, _, _ = dmp.rollout()
-        x_classical = x_track.copy()
-        ## Rollout with different initial position
-        dmp.x0 = np.array([0.0, 0.0])
-        dmp.reset_state()
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_r = x_track.copy()
-        dmp.rescale = False
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_nr = x_track.copy()
-        fig = plt.figure(1)
-        plt.plot(x, y, '-', label = 'desired')
-        plt.plot(x_classical[:, 0], x_classical[:, 1], ':', label = 'classical imitation')
-        plt.plot(x_moved_r[:, 0], x_moved_r[:, 1], '--', label = 'moved goal with rescale')
-        plt.plot(x_moved_nr[:, 0], x_moved_nr[:, 1], '--', label = 'moved goal without rescale')
-        plt.legend(loc = 'best')
-        plt.axis('equal')
-        plt.title(r'Different $x_0$')
-        ## Rollout with different goal
-        dmp.x0 = x_0 # original starting point
-        dmp.reset_state()
-        dmp.goal = np.array ([- 0.2, - 1.0])
-        dmp.rescale = True
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_r = x_track.copy()
-        dmp.rescale = False
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_nr = x_track.copy()
-        fig = plt.figure(2)
-        plt.plot(x, y, '-', label = 'desired')
-        plt.plot(x_classical[:, 0], x_classical[:, 1], ':', label = 'classical imitation')
-        plt.plot(x_moved_r[:, 0], x_moved_r[:, 1], '--', label = 'moved goal with rescale')
-        plt.plot(x_moved_nr[:, 0], x_moved_nr[:, 1], '--', label = 'moved goal without rescale')
-        plt.legend(loc = 'best')
-        plt.axis('equal')
-        plt.title(r'Different goal')
-        ## Rollout with both different initial position and goals
-        dmp.x0 = np.array([0.0, 0.0])
-        dmp.reset_state()
-        dmp.goal = np.array ([- 0.2, - 1.0])
-        dmp.goal /= 3.0
-        dmp.rescale = True
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_r = x_track.copy()
-        dmp.rescale = False
-        x_track, _, _, _ = dmp.rollout()
-        x_moved_nr = x_track.copy()
-        fig = plt.figure(3)
-        plt.plot(x, y, '-', label = 'desired')
-        plt.plot(x_classical[:, 0], x_classical[:, 1], ':', label = 'classical imitation')
-        plt.plot(x_moved_r[:, 0], x_moved_r[:, 1], '--', label = 'moved goal with rescale')
-        plt.plot(x_moved_nr[:, 0], x_moved_nr[:, 1], '--', label = 'moved goal without rescale')
-        plt.legend(loc = 'best')
-        plt.axis('equal')
-        plt.title(r"Different $x_0$ and goal")
-        plt.show()
-        """
-        Second demo: regression on multiple trajectories
-        """
-        num_traj = 50
-        traj_set = []
-        t_set = []
-        # The trajectories will be generated by numerically integrating a dynamical system
-        def RK4(x0, m, tf):
-            def fun(x):
-                x1 = x[0]
-                x2 = x[1]
-                f1 = x1 ** 3 + x2 ** 2 * x1 - x1 - x2
-                f2 = x2 ** 3 + x1 ** 2 * x2 + x1 - x2
-                return np.array([f1, f2])
-            X = np.zeros([m, len(x0)])
-            X[0] = x0.copy()
-            dt = tf / (m - 1)
-            x = x0
-            for n in range(m - 1):
-                K1 = fun(x)
-                K2 = fun(x + dt * K1 / 2.)
-                K3 = fun(x + dt * K2 / 2.)
-                K4 = fun(x + dt * K3)
-                x += dt * (K1 + 2 * K2 + 2 * K3 + K4) / 6.
-                X[n+1] = x
-            return X
-        # Trajectory set generation
-        for i in range(num_traj):
-            ## Random select x0, tf, and m
-            theta = np.random.rand() * 2.0 * np.pi
-            rho = 1.0 - np.random.rand() / 5.0
-            x0 = rho * np.array([np.cos(theta), np.sin(theta)])
-            tf = 6.0 + 2.0 * (np.random.rand() - 0.5)
-            m = int (500 + np.floor(500 * np.random.rand()))
-            t_set.append(np.linspace(0.0, tf, m))
-            # Execute the trajectory
-            X = RK4(x0, m, tf)
-            traj_set.append(X.copy())
-            # Plot
-            plt.figure(1)
-            plt.plot(X[:, 0], X[:, 1], '-b', lw = 0.5)
-            plt.axis('equal')
-            # Plot after translation and roto dilatation
-            Z = X - X[0]
-            old_pos = Z[- 1]
-            R = roto_dilatation(old_pos, np.array([1, 1]))
-            Z = np.dot(Z, np.transpose(R))
-            plt.figure(2)
-            plt.plot(Z[:, 0], Z[:, 1], '-b', lw = 0.5)
-            plt.axis('equal')
-        # DMP learning and execution
-        MP = dmps(n_dmps = 2, n_bfs = 50, K = 1000, alpha_s = 4.0,rescale = True, T = 2.0)
-        MP.paths_regression(traj_set, t_set)
-        x_track, dx_track, ddx_track, _ = MP.rollout()
-        plt.figure(2)
-        plt.plot(x_track[:, 0], x_track[:, 1], '-r')
-        plt.title(r'Traj. set (blue) and DMP (red) in the "aligned" space')
-        # Plot from an arbitrary position
-        theta = 2.0 * np.pi * np.random.rand()
-        rho = 1.0 - np.random.rand() / 5.0
-        MP.x0 = rho * np.array([np.cos(theta), np.sin(theta)])
-        MP.goal = np.zeros(2)
-        x_track, dx_track, ddx_track, _ = MP.rollout()
-        plt.figure(1)
-        plt.plot(x_track[:, 0], x_track[:, 1], '-r')
-        plt.title(r'Traj. set (blue) and DMP (red) in the "original" space')
-        plt.show()

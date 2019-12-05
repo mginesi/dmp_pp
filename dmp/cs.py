@@ -1,28 +1,26 @@
-# ---------------------------------------------------------------------------- #
-# Copyright (C) 2018 Michele Ginesi
-# Copyright (C) 2018 Daniele Meli
-# Copyright (C) 2013 Travis DeWolf
+'''
+Copyright (C) 2019 Michele Ginesi
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
-# GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-# ---------------------------------------------------------------------------- #
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+'''
 
 import numpy as np
 
 class CanonicalSystem():
-    # ------------------------------------------------------------------------ #
-    # Implementation of the canonical dynamical system
-    # ------------------------------------------------------------------------ #
+    '''
+    Implementation of the canonical dynamical system
+    '''
 
     def __init__(self, dt, alpha_s = 4.0, run_time = 1.0, **kwargs):
 
@@ -34,16 +32,16 @@ class CanonicalSystem():
         self.reset_state()
 
     def reset_state(self):
-        # -------------------------------------------------------------------- #
-        # Reset the system state
-        # -------------------------------------------------------------------- #
+        '''
+        Reset the system state
+        '''
 
         self.s = 1.0
 
     def rollout(self, tau = 1.0, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Generate s.
-        # -------------------------------------------------------------------- #
+        '''
+        Generate s.
+        '''
 
         timesteps = int(self.timesteps / tau)
         s_track = np.zeros(timesteps)
@@ -54,11 +52,11 @@ class CanonicalSystem():
         return s_track
 
     def step(self, tau = 1.0, error_coupling = 1.0, **kwargs):
-        # -------------------------------------------------------------------- #
-        # Generate a single step of s.
-        #   tau float
-        #   error_coupling float
-        # -------------------------------------------------------------------- #
+        '''
+        Generate a single step of s.
+          tau float
+          error_coupling float
+        '''
 
         # Since the canonical system is linear, we use an exponential method
         # (which is exact)
