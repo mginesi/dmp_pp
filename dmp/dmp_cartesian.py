@@ -47,7 +47,7 @@ class DMPs_cartesian(object):
     def __init__(self,
         n_dmps = 3, n_bfs = 50, dt = 0.01, x0 = None, goal = None, T = 1.0,
         K = 1050, D = None, w = None, tol = 0.01, alpha_s = 4.0,
-        rescale = False, basis = 'gaussian', **kwargs):
+        rescale = None, basis = 'gaussian', **kwargs):
         '''
         n_dmps int   : number of dynamic movement primitives (i.e. dimensions)
         n_bfs int    : number of basis functions per DMP (actually, they will
@@ -61,7 +61,13 @@ class DMPs_cartesian(object):
         w array      : associated weights
         tol float    : tolerance
         alpha_s float: constant of the Canonical System
-        rescale bool : decide if the rescale property is used
+        rescale      : tell which affine transformation use in the Cartesian
+                       component to be make affine invariant, possible values
+                       are:
+                         None: no scalability
+                         'rotodilatation': use rotodilatation
+                         'diagonal': use a diagonal matrix ("old" DMP 
+                            formulation)
         basis string : type of basis functions
         '''
         # Tolerance for the accuracy of the movement: the trajectory will stop
@@ -407,9 +413,12 @@ class DMPs_cartesian(object):
         b_tilde = np.zeros(2 * self.n_dmps)
         f = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * s
         f = np.nan_to_num(f)
-        if self.rescale:
+        if self.rescale == 'rotodilatation':
             new_position = self.goal - self.x0
             M = roto_dilatation(self.learned_position, new_position)
+            f = np.dot(M, f)
+        if self.rescale == 'diagonal':
+            M = np.diag((self.goal - self.x0) / self.learned_position)
             f = np.dot(M, f)
         # Set the state vector and the affine part of the scheme
         # Linear part

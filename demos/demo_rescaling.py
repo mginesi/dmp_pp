@@ -29,8 +29,8 @@ ms = 10 # marker size
 # Initialization and lLearning the forcing term
 myK = 1000
 alpha_s = 4.0
-dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
-dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
+dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = 'rotodilatation', alpha_s = alpha_s, tol = 0.05)
+dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = None, alpha_s = alpha_s, tol = 0.05)
 dmp_rescaling.imitate_path (x_des = x_des)
 dmp_classical.imitate_path (x_des = x_des)
 x_learned, _, _, _ = dmp_classical.rollout()
@@ -49,6 +49,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_rot_classical[:, 0], x_rot_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_rot_rescaling[:, 0], x_rot_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -68,6 +69,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_dilat_classical[:, 0], x_dilat_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_dilat_rescaling[:, 0], x_dilat_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -87,6 +89,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_shrink_classical[:, 0], x_shrink_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_shrink_rescaling[:, 0], x_shrink_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -159,6 +162,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_track_classical[:, 0], x_track_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_track_rescaling[:, 0], x_track_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(goal_track[:, 0], goal_track[:,1], ':k', linewidth = lw, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 plt.plot(goal_track[-1][0], goal_track[-1][1], '*k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
@@ -173,8 +177,8 @@ plt.title(r'$\alpha$ = 4')
 # Initialization and learning the forcing term
 myK = 1000
 alpha_s = 1.0
-dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = True, alpha_s = alpha_s, tol = 0.05)
-dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = False, alpha_s = alpha_s, tol = 0.05)
+dmp_rescaling = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = 'rotodilatation', alpha_s = alpha_s, tol = 0.05)
+dmp_classical = dmp_cartesian.DMPs_cartesian (n_dmps = 2, n_bfs = 50, K = myK, rescale = None, alpha_s = alpha_s, tol = 0.05)
 dmp_rescaling.imitate_path (x_des = x_des)
 dmp_classical.imitate_path (x_des = x_des)
 x_learned, _, _, _ = dmp_classical.rollout()
@@ -193,6 +197,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_rot_classical[:, 0], x_rot_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_rot_rescaling[:, 0], x_rot_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -212,6 +217,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_dilat_classical[:, 0], x_dilat_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_dilat_rescaling[:, 0], x_dilat_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -231,6 +237,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_shrink_classical[:, 0], x_shrink_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_shrink_rescaling[:, 0], x_shrink_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(new_goal[0], new_goal[1], '*k', markersize = ms, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
 plt.xlabel(r'$x_1$')
@@ -303,6 +310,7 @@ plt.plot(x_learned[:, 0], x_learned[:, 1], '-b', linewidth = lw, label = r'Demon
 plt.plot(x_track_classical[:, 0], x_track_classical[:, 1], '--r', linewidth = lw, label = r'Classical DMP')
 plt.plot(x_track_rescaling[:, 0], x_track_rescaling[:, 1], '-.g', linewidth = lw, label = r'DMP++')
 plt.plot(goal_track[:, 0], goal_track[:,1], ':k', linewidth = lw, label = r'New goal position')
+plt.plot(0, 0, '.k', markersize = ms)
 plt.plot(goal_track[-1][0], goal_track[-1][1], '*k', markersize = ms)
 if print_legend:
   plt.legend(loc = 'upper right')
