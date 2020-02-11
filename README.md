@@ -2,11 +2,11 @@
 
 This repository contains the implementation of Dynamic Movement Primitives, in Python 3.5.
 
-In particular, this repository contains all the synthetic tests done for the work:
+In particular, this repository contains all the synthetic tests done for the work
 
-_M. Ginesi, N. Sansonetto, and P. Fiorini_; **DMP++: Overcoming Some Drawbacks of Dynamic Movement Primitives**
+_M. Ginesi, N. Sansonetto, and P. Fiorini_; **Overcoming Some Drawbacks of Dynamic Movement Primitives**
 
-You can find the pre-print at https://arxiv.org/abs/1908.10608v1
+You can find the pre-print at https://arxiv.org/abs/1908.10608
 
 ## Installation ##
 
@@ -133,6 +133,24 @@ DMPs can be written to be invariant under affine transformations. We have implem
 In the following figure, the desired (and learned) trajectory is plotted in blue. the new goal is represented by the black star. The dashed red line shows the execution obtained with classical DMPs, while the dash-dotted green line show the execution obtained by taking advantage of the affine invariance.
 
 ![classical VS extended DMPs](doc/generalization.png)
+
+### "Old" Formulation ###
+
+The "original" DMP formulation was slightly different:
+
+$$ \begin{cases}
+    \tau \dot{\mathbf{v}} = \mathbf{K} (\mathbf{g} - \mathbf{x}) - \mathbf{D} \mathbf{v} - \mathbf{K} ( \mathbf{g} - \mathbf{x}_0 ) s + (\mathbf{g} - \mathbf{x}_0) \odot \mathbf{f}(s) \\
+    \tau \dot{\mathbf{x}} = \mathbf{v}
+\end{cases} . $$
+
+It presented some drawbacks when the learning quantities $\mathbf{g}-\mathbf{x}_0$ is null or small in any direction.
+In particular
+ * if $g - x_0$ is zero, the forcing term can not be learned;
+ * if $g - x_0$ is small and it changes between learning and execution, the trajectory can become extremely different
+ * if $g - x_0$ change sign from the learned to the desired configuration, the trajectory will result mirrored.
+The second and third drawbacks are shown in the figure below (you can reproduce the result by running `demos/old_vs_new.py`).
+
+![old_vs_new](doc/old_vs_new.png)
 
 ## Contact ##
 
