@@ -1,7 +1,5 @@
 '''
-Copyright (C) 2019 Michele Ginesi
-Copyright (C) 2018 Daniele Meli
-Copyright (C) 2013 Travis DeWolf
+Copyright (C) 2020 Michele Ginesi
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,13 +18,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import numpy as np
 import scipy.integrate
 import scipy.interpolate
+import scipy.linalg
 import copy
+import pdb
 
 from dmp.cs import CanonicalSystem
 from dmp.exponential_integration import exp_eul_step
 from dmp.exponential_integration import phi1
 from dmp.rotation_matrix import roto_dilatation
-import dmp.derivative_matrices as der_mtrx
+from dmp.derivative_matrices import compute_D1, compute_D2
 
 class DMPs_cartesian(object):
     '''
@@ -45,7 +45,7 @@ class DMPs_cartesian(object):
     '''
 
     def __init__(self,
-        n_dmps = 3, n_bfs = 50, dt = 0.01, x0 = None, goal = None, T = 1.0,
+        n_dmps = 3, n_bfs = 50, dt = 0.01, x_0 = None, x_goal = None, T = 1.0,
         K = 1050, D = None, w = None, tol = 0.01, alpha_s = 4.0,
         rescale = None, basis = 'gaussian', **kwargs):
         '''
@@ -53,8 +53,8 @@ class DMPs_cartesian(object):
         n_bfs int    : number of basis functions per DMP (actually, they will
                        be one more)
         dt float     : timestep for simulation
-        x0 array     : initial state of DMPs
-        goal array   : goal state of DMPs
+        x_0 array     : initial state of DMPs
+        x_goal array   : x_goal state of DMPs
         T float      : final time
         K float      : elastic parameter in the dynamical system
         D float      : damping parameter in the dynamical system
@@ -70,17 +70,18 @@ class DMPs_cartesian(object):
                             formulation)
         basis string : type of basis functions
         '''
+
         # Tolerance for the accuracy of the movement: the trajectory will stop
         # when || x - g || <= tol
-        self.tol = tol
-        self.n_dmps = n_dmps
-        self.n_bfs = n_bfs
+        self.tol = copy.deepcopy(tol)
+        self.n_dmps = copy.deepcopy(n_dmps)
+        self.n_bfs = copy.deepcopy(n_bfs)
 
         # Default values give as in [2]
-        self.K = K
+        self.K = copy.deepcopy(K)
         if D is None:
             D = 2 * np.sqrt(self.K)
-        self.D = D
+        self.D = copy.deepcopy(D)
 
         # Set up the CS
         self.cs = CanonicalSystem(dt = dt, run_time = T, alpha_s = alpha_s)
@@ -89,14 +90,14 @@ class DMPs_cartesian(object):
         self.compute_linear_part()
 
         # Set up the DMP system
-        if x0 is None:
-            x0 = np.zeros(self.n_dmps)
-        if goal is None:
-            goal = np.zeros(self.n_dmps)
-        self.x0 = x0
-        self.goal = goal
-        self.rescale = rescale
-        self.basis = basis
+        if x_0 is None:
+            x_0 = np.zeros(self.n_dmps)
+        if x_goal is None:
+            x_goal = np.ones(self.n_dmps)
+        self.x_0 = copy.deepcopy(x_0)
+        self.x_goal = copy.deepcopy(x_goal)
+        self.rescale = copy.deepcopy(rescale)
+        self.basis = copy.deepcopy(basis)
         self.reset_state()
         self.gen_centers()
         self.gen_width()
@@ -104,7 +105,7 @@ class DMPs_cartesian(object):
         # If no weights are give, set them to zero
         if w is None:
             w = np.zeros([self.n_dmps, self.n_bfs + 1])
-        self.w = w
+        self.w = copy.deepcopy(w)
 
     def compute_linear_part(self):
         '''
@@ -223,9 +224,9 @@ class DMPs_cartesian(object):
                        regression over multiple demonstrations
         '''
 
-        ## Set initial state and goal
-        self.x0 = x_des[0].copy()
-        self.goal = x_des[-1].copy()
+        ## Set initial state and x_goal
+        self.x_0 = x_des[0].copy()
+        self.x_goal = x_des[-1].copy()
 
         ## Set t_span
         if t_des is None:
@@ -248,7 +249,7 @@ class DMPs_cartesian(object):
         ## Second order estimates of the derivatives
         ## (the last non centered, all the others centered)
         if dx_des is None:
-            D1 = der_mtrx.compute_D1(self.cs.timesteps, self.cs.dt)
+            D1 = compute_D1(self.cs.timesteps, self.cs.dt)
             dx_des = np.dot(D1, x_des)
         else:
             dpath = np.zeros([self.cs.timesteps, self.n_dmps])
@@ -256,7 +257,7 @@ class DMPs_cartesian(object):
             dpath = dpath_gen(time)
             dx_des = dpath.transpose()
         if ddx_des is None:
-            D2 = der_mtrx.compute_D2(self.cs.timesteps, self.cs.dt)
+            D2 = compute_D2(self.cs.timesteps, self.cs.dt)
             ddx_des = np.dot(D2, x_des)
         else:
             ddpath = np.zeros([self.cs.timesteps, self.n_dmps])
@@ -266,15 +267,15 @@ class DMPs_cartesian(object):
 
         ## Find the force required to move along this trajectory
         s_track = self.cs.rollout()
-        f_target = ((ddx_des / self.K - (self.goal - x_des) + 
+        f_target = ((ddx_des / self.K - (self.x_goal - x_des) + 
             self.D / self.K * dx_des).transpose() +
-            np.reshape((self.goal - self.x0), [self.n_dmps, 1]) * s_track)
+            np.reshape((self.x_goal - self.x_0), [self.n_dmps, 1]) * s_track)
         if g_w:
             # Efficiently generate weights to realize f_target
             # (only if not called by paths_regression)
             self.gen_weights(f_target)
             self.reset_state()
-            self.learned_position = self.goal - self.x0
+            self.learned_position = self.x_goal - self.x_0
         return f_target
 
     def paths_regression(self, traj_set, t_set = None):
@@ -299,10 +300,10 @@ class DMPs_cartesian(object):
                 t_des_tmp *= self.cs.run_time
 
             # Alignment of the trajectory so that
-            # x0 = [0; 0; ...; 0] and g = [1; 1; ...; 1].
+            # x_0 = [0; 0; ...; 0] and g = [1; 1; ...; 1].
             x_des_tmp = copy.deepcopy(traj_set[it])
-            x_des_tmp -= x_des_tmp[0] # translation to x0 = 0
-            g_old = x_des_tmp[-1] # original goal position
+            x_des_tmp -= x_des_tmp[0] # translation to x_0 = 0
+            g_old = x_des_tmp[-1] # original x_goal position
             R = roto_dilatation(g_old, g_new) # rotodilatation
 
             # Rescaled and rotated trajectory
@@ -350,9 +351,9 @@ class DMPs_cartesian(object):
         '''
         Reset the system state
         '''
-        self.x = self.x0.copy()
+        self.x = self.x_0.copy()
         if v0 is None:
-            v0 = 0.0 * self.x0
+            v0 = 0.0 * self.x_0
         self.dx = v0
         self.ddx = np.zeros(self.n_dmps)
         self.cs.reset_state()
@@ -366,83 +367,125 @@ class DMPs_cartesian(object):
 
         # Reset the state of the DMP
         if v0 is None:
-            v0 = 0.0 * self.x0
+            v0 = 0.0 * self.x_0
         self.reset_state(v0 = v0)
-        # Set up tracking vectors
-        x_track = np.zeros((0, self.n_dmps))
-        dx_track = np.zeros((0, self.n_dmps))
-        ddx_track = np.zeros((0, self.n_dmps))
-        # Add the initial value to the tracking vectors
-        x_track = np.append(x_track, [self.x0], axis = 0)
-        dx_track = np.append(dx_track, [v0], axis = 0)
-        ddx_track = np.append(ddx_track, [0.0 * self.x0], axis = 0)
-        flag_stop = False # flag to decide if the execution has to be stopped
-        t = 0
-        t_track = [0]
-        # In rollout there is no need to compute phi1 (dt A) all the times
-        while (not flag_stop):
-            # Run and record timestep
-            x_track_s, dx_track_s, ddx_track_s = self.step(tau = tau)
-            x_track = np.append(x_track, [x_track_s], axis=0)
-            dx_track = np.append(dx_track, [dx_track_s],axis=0)
-            ddx_track = np.append(ddx_track, [ddx_track_s],axis=0)
-            t_track.append(t_track[-1] + self.cs.dt)
-            t += 1
-            stop_c = (np.linalg.norm(x_track_s - self.goal) /
-                np.linalg.norm(self.x0 - self.goal)) < self.tol
-            stop_cs = (self.cs.s <
-                np.exp(- self.cs.alpha_s * self.cs.run_time) + self.tol)
-            flag_stop = stop_c and stop_cs
+        x_track = np.array([self.x_0])
+        dx_track = np.array([v0])
+        t_track = np.array([0])
+        state = np.zeros(2 * self.n_dmps)
+        state[range(0, 2*self.n_dmps, 2)] = copy.deepcopy(v0)
+        state[range(1, 2*self.n_dmps + 1, 2)] = copy.deepcopy(self.x_0)
+        if self.rescale == 'rotodilatation':
+            M = roto_dilatation(self.learned_position, self.x_goal - self.x_0)
+        elif self.rescale == 'diagonal':
+            M = np.diag((self.x_goal - self.x_0) / self.learned_position)
+        else:
+            M = np.eye(self.n_dmps)
+        psi = self.gen_psi(self.cs.s)
+        f0 = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * self.cs.s
+        f0 = np.nan_to_num(np.dot(M, f0))
+        ddx_track = np.array([-self.D * v0 + self.K*f0])
+        err = np.linalg.norm(state[range(1, 2*self.n_dmps + 1, 2)] - self.x_goal)
+        P = phi1(self.cs.dt * self.linear_part / tau)
+        while err > self.tol:
+            psi = self.gen_psi(self.cs.s)
+            f = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * self.cs.s
+            f = np.nan_to_num(np.dot(M, f))
+            beta = np.zeros(2 * self.n_dmps)
+            beta[range(0, 2*self.n_dmps, 2)] = \
+                self.K * (self.x_goal * (1.0 - self.cs.s) + 
+                self.x_0 * self.cs.s + f) / tau
+            vect_field = np.dot(self.linear_part, state) + beta
+            state += self.cs.dt * np.dot(P, vect_field)
+            x_track = np.append(x_track,
+                np.array([state[range(1, 2*self.n_dmps + 1, 2)]]), axis=0)
+            dx_track = np.append(dx_track,
+                np.array([state[range(0, 2*self.n_dmps, 2)]]), axis=0)
+            t_track = np.append(t_track, t_track[-1] + self.cs.dt)
+            err = np.linalg.norm(state[range(1, 2*self.n_dmps + 1, 2)] - self.x_goal)
+            self.cs.step()
+            ddx_track = np.append(ddx_track,
+                np.array([self.K * (self.x_goal - x_track[-1]) -
+                    self.D * dx_track[-1] -
+                    self.K * (self.x_goal - self.x_0) * self.cs.s +
+                    self.K * f]), axis=0)
         return x_track, dx_track, ddx_track, t_track
 
-    def step(self, tau = 1.0, error = 0.0, external_force = None, **kwargs):
+    def step(self, tau = 1.0, error = 0.0, external_force = None,
+        adapt=False, tols=None, **kwargs):
         '''
         Run the DMP system for a single timestep.
-          P array : phi1 (dt A). If None it is recomputed
           tau float: time rescaling constant
           error float: optional system feedback
           external_force 1D array: external force to add to the system
+          adapt bool: says if using adaptive step
+          tols float list: [rel_tol, abs_tol]
         '''
-        error_coupling = 1.0 / (1.0 + error)
-        # Generate basis function activation
-        s = self.cs.s
-        psi = self.gen_psi(s)
-        f = np.zeros(self.n_dmps)
-        # Initialize the integration scheme
-        state = np.zeros(2 * self.n_dmps)
-        b_tilde = np.zeros(2 * self.n_dmps)
-        f = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * s
-        f = np.nan_to_num(f)
+
+        ## Initialize
+        if tols is None:
+            tols = [1e-03, 1e-06]
+        ## Setup
+        # Scaling matrix
         if self.rescale == 'rotodilatation':
-            new_position = self.goal - self.x0
-            M = roto_dilatation(self.learned_position, new_position)
-            f = np.dot(M, f)
-        if self.rescale == 'diagonal':
-            M = np.diag((self.goal - self.x0) / self.learned_position)
-            f = np.dot(M, f)
-        # Set the state vector and the affine part of the scheme
-        # Linear part
-        A_m = self.linear_part / tau
-        P_m = phi1(self.cs.dt * A_m)
+            M = roto_dilatation(self.learned_position, self.x_goal - self.x_0)
+        elif self.rescale == 'diagonal':
+            M = np.diag((self.x_goal - self.x_0) / self.learned_position)
+        else:
+            M = np.eye(self.n_dmps)
+        # Coupling term in canonical system
+        error_coupling = 1.0 / (1.0 + error)
+        alpha_tilde = - self.cs.alpha_s / tau / error_coupling
         # State definition
-        state[range(0, 2 * self.n_dmps, 2)] = self.dx
-        state[range(1, 2 * self.n_dmps + 1, 2)] = self.x
-        # Affine part
-        b_tilde[range(0, 2 * self.n_dmps, 2)] = \
-            self.K * (self.goal * (1. - s) + self.x0 * s + f)
+        state = np.zeros(2 * self.n_dmps)
+        state[0::2] = self.dx
+        state[1::2] = self.x
+        # Linear part of the dynamical system
+        A_m = self.linear_part / tau
+        # s-dep part of the dynamical system
+        def beta_s(s, x, v):
+            psi = self.gen_psi(s)
+            f = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * self.cs.s
+            f = np.nan_to_num(np.dot(M, f))
+            out = np.zeros(2 * self.n_dmps)
+            out[0::2] = self.K * (self.x_goal * (1.0 - s) + self.x_0 * s + f)
+            if external_force is not None:
+                out[0::2] += external_force(x, v)
+            return out / tau
+        ## Initialization of the adaptive step
+        flag_tol = False
+        while not flag_tol:
+            # Bogacki–Shampine method
+            # Defining the canonical system in the time of the scheme
+            s1 = copy.deepcopy(self.cs.s)
+            s2 = s1 * np.exp(-alpha_tilde * self.cs.dt * 1.0/2.0)
+            s3 = s1 * np.exp(-alpha_tilde * self.cs.dt * 3.0/4.0)
+            s4 = s1 * np.exp(-alpha_tilde * self.cs.dt)
+            xi1 = np.dot(A_m, state) + beta_s(s1, state[1::2], state[0::2])
+            xi2 = np.dot(A_m, state + self.cs.dt * xi1 * 1.0/2.0) + \
+                beta_s(s2, state[1::2] + self.cs.dt * xi1[1::2] * 1.0/2.0,
+                    state[0::2] + self.cs.dt * xi1[0::2] * 1.0/2.0)
+            xi3 = np.dot(A_m, state + self.cs.dt * xi2 * 3.0/4.0) + \
+                beta_s(s3, state[1::2] + self.cs.dt * xi2[1::2] * 3.0/4.0,
+                state[0::2] + self.cs.dt * xi2[0::2] * 3.0/4.0)
+            xi4 = np.dot(A_m, state + self.cs.dt * (2.0 * xi1 + 3.0 * xi2 + 4.0 * xi3) / 9.0) + \
+                beta_s(s4, state[1::2] + self.cs.dt * (2.0 * xi1[1::2] + 3.0 * xi2[1::2] + 4.0 * xi3[1::2]) / 9.0,
+                state[0::2] + self.cs.dt * (2.0 * xi1[0::2] + 3.0 * xi2[0::2] + 4.0 * xi3[0::2]) / 9.0)
+            y_ord2 = state + self.cs.dt * (2.0 * xi1 + 3.0 * xi2 + 4.0 * xi3) / 9.0
+            y_ord3 = state + self.cs.dt * (7.0 * xi1 + 6.0 * xi2 + 8.0 * xi3 + 3.0 * xi4) / 24.0
+            if (np.linalg.norm(y_ord2 - y_ord3) < tols[0] * np.linalg.norm(state) + tols[1]) or (not adapt):
+                flag_tol = True
+                state = copy.deepcopy(y_ord3)
+            else:
+                self.cs.dt /= 1.1
+        self.cs.step()
+        self.x = copy.deepcopy(state[1::2])
+        self.dx = copy.deepcopy(state[0::2])
+        psi = self.gen_psi(self.cs.s)
+        f = (np.dot(self.w, psi[:, 0])) / (np.sum(psi[:, 0])) * self.cs.s
+        f = np.nan_to_num(np.dot(M, f))
+        self.ddx = (self.K * (self.x_goal - self.x) - self.D * self.dx \
+            - self.K * (self.x_goal - self.x_0) * self.cs.s + self.K * f) / tau
         if external_force is not None:
-            b_tilde[range(0, 2 * self.n_dmps, 2)] += external_force
-        b_tilde[range(1, 2 * self.n_dmps + 1, 2)] = 0.0
-        b_tilde /= tau
-        # Vector field
-        vect_field = np.dot(A_m, state) + b_tilde
-        # Integration step
-        state += self.cs.dt * np.dot(P_m, vect_field)
-        self.x = state[range(1, 2 * self.n_dmps + 1, 2)]
-        self.dx = state[range(0, 2 * self.n_dmps, 2)]
-        self.ddx = (self.K / (tau ** 2.0) * 
-            ((self.goal - self.x) - (self.goal - self.x0) * s + f)) \
-            - self.D / tau * self.dx
-        # Run canonical system
-        s = self.cs.step(tau = tau, error_coupling = error_coupling)
+            self.ddx += external_force(self.x, self.dx) / tau
         return self.x, self.dx, self.ddx

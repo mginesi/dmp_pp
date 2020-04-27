@@ -15,7 +15,7 @@ alpha = 4.0
 n_dim = 2
 n_bfs = 50
 dt = 0.01
-tol = 1.0 / 100
+tol = 0.05
 
 # DMP initialization
 MP_new = dmp.DMPs_cartesian(n_dmps = n_dim, n_bfs = n_bfs, K = K, dt = dt, alpha_s = alpha, tol = tol, rescale=None)
@@ -35,13 +35,13 @@ MP_old.imitate_path(x_des = gamma)
 g_high = g_old + np.array([0, g_old[-1]])
 g_under = g_old * np.array([1, -1])
 
-MP_new.goal = g_high
-MP_old.goal = g_high
+MP_new.x_goal = g_high
+MP_old.x_goal = g_high
 mp_new_high = MP_new.rollout()[0]
 mp_old_high = MP_old.rollout()[0]
 
-MP_new.goal = g_under
-MP_old.goal = g_under
+MP_new.x_goal = g_under
+MP_old.x_goal = g_under
 mp_new_under = MP_new.rollout()[0]
 mp_old_under = MP_old.rollout()[0]
 
