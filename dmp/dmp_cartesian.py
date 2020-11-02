@@ -395,7 +395,7 @@ class DMPs_cartesian(object):
             beta[range(0, 2*self.n_dmps, 2)] = \
                 self.K * (self.x_goal * (1.0 - self.cs.s) + 
                 self.x_0 * self.cs.s + f) / tau
-            vect_field = np.dot(self.linear_part, state) + beta
+            vect_field = np.dot(self.linear_part / tau, state) + beta
             state += self.cs.dt * np.dot(P, vect_field)
             x_track = np.append(x_track,
                 np.array([state[range(1, 2*self.n_dmps + 1, 2)]]), axis=0)
@@ -403,7 +403,7 @@ class DMPs_cartesian(object):
                 np.array([state[range(0, 2*self.n_dmps, 2)]]), axis=0)
             t_track = np.append(t_track, t_track[-1] + self.cs.dt)
             err = np.linalg.norm(state[range(1, 2*self.n_dmps + 1, 2)] - self.x_goal)
-            self.cs.step()
+            self.cs.step(tau=tau)
             ddx_track = np.append(ddx_track,
                 np.array([self.K * (self.x_goal - x_track[-1]) -
                     self.D * dx_track[-1] -
@@ -478,7 +478,7 @@ class DMPs_cartesian(object):
                 state = copy.deepcopy(y_ord3)
             else:
                 self.cs.dt /= 1.1
-        self.cs.step()
+        self.cs.step(tau=tau)
         self.x = copy.deepcopy(state[1::2])
         self.dx = copy.deepcopy(state[0::2])
         psi = self.gen_psi(self.cs.s)
