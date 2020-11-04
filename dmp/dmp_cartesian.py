@@ -434,7 +434,7 @@ class DMPs_cartesian(object):
         else:
             M = np.eye(self.n_dmps)
         # Coupling term in canonical system
-        error_coupling = 1.0 / (1.0 + error)
+        error_coupling = 1.0 + error
         alpha_tilde = - self.cs.alpha_s / tau / error_coupling
         # State definition
         state = np.zeros(2 * self.n_dmps)
@@ -478,7 +478,7 @@ class DMPs_cartesian(object):
                 state = copy.deepcopy(y_ord3)
             else:
                 self.cs.dt /= 1.1
-        self.cs.step(tau=tau)
+        self.cs.step(tau=tau, error_coupling=error_coupling)
         self.x = copy.deepcopy(state[1::2])
         self.dx = copy.deepcopy(state[0::2])
         psi = self.gen_psi(self.cs.s)
