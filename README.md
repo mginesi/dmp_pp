@@ -4,9 +4,11 @@ This repository contains the implementation of Dynamic Movement Primitives, in P
 
 In particular, this repository contains all the synthetic tests done for the work
 
-_M. Ginesi, N. Sansonetto, and P. Fiorini_; **Overcoming Some Drawbacks of Dynamic Movement Primitives**
+_GINESI, Michele; SANSONETTO, Nicola; FIORINI, Paolo._ **Overcoming some drawbacks of dynamic movement primitives.** Robotics and Autonomous Systems, 2021, 144: 103844.
 
-You can find the pre-print at https://arxiv.org/abs/1908.10608
+https://doi.org/10.1016/j.robot.2021.103844
+
+File gsf21.bib contains the bibentry. Please refer to this work when using the package!
 
 ## Installation ##
 
