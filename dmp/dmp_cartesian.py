@@ -177,30 +177,9 @@ class DMPs_cartesian(object):
         psi_track = self.gen_psi(s_track)
         # Compute useful quantities
         sum_psi = np.sum(psi_track, 0)
-        sum_psi_2 = sum_psi * sum_psi
-        s_track_2 = s_track * s_track
-        # Set up the minimization problem
-        A = np.zeros([self.n_bfs + 1, self.n_bfs + 1])
-        b = np.zeros([self.n_bfs + 1])
-        # The matrix does not depend on f
-        for k in range(self.n_bfs + 1):
-            A[k, k] = scipy.integrate.simps(
-                psi_track[k] * psi_track[k] * s_track_2 / sum_psi_2, s_track)
-            for h in range(k + 1, self.n_bfs + 1):
-                A[k, h] = scipy.integrate.simps(
-                    psi_track[k] * psi_track[h] * s_track_2 / sum_psi_2,
-                    s_track)
-                A[h, k] = A[k, h].copy()
-        LU = scipy.linalg.lu_factor(A)
-        # The problem is decoupled for each dimension
-        for d in range(self.n_dmps):
-            # Create the vector of the regression problem
-            for k in range(self.n_bfs + 1):
-                b[k] = scipy.integrate.simps(
-                    f_target[d] * psi_track[k] * s_track / sum_psi, s_track)
-            # Solve the minimization problem
-            self.w[d] = scipy.linalg.lu_solve(LU, b)
-        self.w = np.nan_to_num(self.w)
+        P = psi_track / sum_psi * s_track
+        # Compute the weights using linear regression
+        self.w = np.nan_to_num(f_target @ np.linalg.pinv(P))
 
     def gen_width(self):
         '''
