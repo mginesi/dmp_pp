@@ -29,7 +29,7 @@ def compute_D1(n, dt):
     d1_p[0] = 4.
     d1_m = - np.ones([n-1])
     d1_m[-1] = - 4.
-    D1 = sparse.diags(np.array([d1_p, d1_m]), [1, -1]).toarray()
+    D1 = sparse.diags((d1_p, d1_m), [1, -1]).toarray()
     D1[0,0] = - 3.
     D1[0, 2] = -1.
     D1[-1, -3] = 1.
@@ -51,7 +51,7 @@ def compute_D2(n, dt):
     d2_c = - 2. * np.ones([n])
     d2_c[0] = 2.
     d2_c[-1] = 2.
-    D2 = sparse.diags(np.array([d2_p, d2_c, d2_m]), [1, 0, -1]).toarray()
+    D2 = sparse.diags((d2_p, d2_c, d2_m), [1, 0, -1]).toarray()
     D2[0, 2] = 4.
     D2[0, 3] = -1.
     D2[-1, -3] = 4.
